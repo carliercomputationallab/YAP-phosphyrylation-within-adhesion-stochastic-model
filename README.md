@@ -1,0 +1,1 @@
+# YAP-phosphyrylation-within-adhesion-stochastic-model
