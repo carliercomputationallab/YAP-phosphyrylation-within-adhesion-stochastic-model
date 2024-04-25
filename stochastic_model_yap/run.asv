@@ -1,0 +1,87 @@
+clc; clear; close all;
+
+%### totalSteps = 
+totalSteps = [0.2]*10^6;
+
+%### diffusion factor (the diffusion rate 19 um2/s is multiplied by this to simulate under lower diffusion condition)
+factor = 0.04; %0.04;
+% factor = 1 % for D = 19 um2/s
+
+%### number of YAP
+particleNumber = 250;
+
+%### number of simulations for each case
+iteration = 3; 
+
+%### adhesion properties
+adhesionNumber = [9]; %[1 2 4 9]; 
+
+integrinNumber = [81]; %this is the same as the number of binding sites
+
+%Below we define the rates. Each set belong to one simulation
+%### different cases: [Rb Ra Ru,YAP Ru,pYAP Rdep] 
+%Ra is the same as the Rp in the paper
+
+rates = {[50 200 0.1 0.2 0.035];
+         [50 200 0.1 0.1 0.035];
+         [50 200 0.1 0.05 0.035];
+         [50 200 0.1 0.01 0.035];
+         [50 200 0.1 0.001 0.035];
+         [50 200 0.1 0.2 0.56];
+         [50 200 0.1 0.1 0.56];
+         [50 200 0.1 0.05 0.56];
+         [50 200 0.1 0.01 0.56];
+         [50 200 0.1 0.001 0.56]};
+size_rates = size(rates);
+
+%### lattice size
+latticeSize = [0.2];
+
+results = struct();
+folder = [datestr(now, 30) '_results\'];
+if ~exist(folder, 'dir')
+       mkdir(folder);
+end
+
+if ~exist('simulation_snapshots\', 'dir')
+       mkdir('simulation_snapshots\');
+end
+
+%### simulation and plot each case separately
+
+for ls = 1:length(latticeSize) 
+    for as = 1:length(adhesionNumber) %edit 1:length(adhesionSize)
+        results(ls).latticeSize = latticeSize(ls);
+        for r =  1:size_rates(1) 
+               
+                for i = 1:iteration   
+
+                      [results(ls).time{r,as}(i,:), results(ls).pYAPAll{r,as}(i,:), results(ls).pYAPOut{r,as}(i,:), mat] =  ...
+                      stochastic_model(totalSteps(ls), adhesionNumber(as), integrinNumber(as), rates{r,as}, latticeSize(ls), factor); %edit adhesionSize(as) --> integrin Number
+
+                      results(ls).avgpYAPAll{r,as}(i) = mean(results(ls).pYAPAll{r,as}(i,end-0.4*totalSteps:end));
+                      results(ls).avgpYAPOut{r,as}(i) = mean(results(ls).pYAPOut{r,as}(i,end-0.4*totalSteps:end));
+                            
+                end
+
+                    results(ls).avg_iterations_pYAPAll{r,as} = mean( results(ls).avgpYAPAll{r,as});
+                    results(ls).std_iterations_pYAPAll{r,as} = std( results(ls).avgpYAPAll{r,as});
+
+                    results(ls).avg_iterations_pYAPOut{r,as} = mean( results(ls).avgpYAPOut{r,as});
+                    results(ls).std_iterations_pYAPOut{r,as} = std( results(ls).avgpYAPOut{r,as});  
+
+                    % plot pYAP all  
+                    figure('Position', [10 10 1500 500]); 
+                    plot(results(ls).time{r,as}', results(ls).pYAPAll{r,as}'/particleNumber,'LineWidth',2);
+%                     title(['pYAPAll' '-latticesize-' num2str(latticeSize(ls))  '-adhesion-number-' num2str(adhesionNumber(as)) '-Rb-' num2str(rates{r,as}(1)) '-Rdep-' num2str(rates{r,as}(end))]);
+                    xlabel('Time (s)'); ylabel('pYAP ratio');
+                    set(gca,'Fontname', 'Times New Roman','fontsize',14);
+                    saveas(gcf,[folder 'pYAPAll' '_adhesion_number_' num2str(adhesionNumber(as)) '_' regexprep(num2str(rates{r,as}), '\s+', ' ') '.png']);        
+                    
+                                      
+        end
+    end
+end
+
+save([folder 'sspYAP'], '-v7.3');
+
