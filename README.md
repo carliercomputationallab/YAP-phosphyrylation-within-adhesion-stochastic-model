@@ -11,7 +11,7 @@ The parameter "lifetime" in "stochastic_model_yap/stochastic_model.m" can be adj
 - A .mat file containing the output data for all steps
 
 ## Plotting figures in the manuscript
-The simulation results used to generate the figures in the manuscript can be found in the main folder. The script "plot_results" can be used to plot all figures in the manuscript and supplemental information. Each code section belongs to one figure.
+The simulation results used to generate the figures in the manuscript are available upon request (hamidreza.jafarinia@maastrichtuniversity.nl). The script "plot_results" can be used to plot all figures in the manuscript and supplemental information. Each code section belongs to one figure.
 
 
 
