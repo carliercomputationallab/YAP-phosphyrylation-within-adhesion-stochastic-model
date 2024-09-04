@@ -597,30 +597,40 @@ clc;
 clear;
 close all;
 
-load('20230829T122341_results\sspYAP.mat'); 
+load('20230815T170105_results\sspYAP.mat'); % this is low diff rate (N=9 small , N=1 large)
+results_sbox = results; 
+load('20240723T204519_results_722YAP_largerbox_xy_234sites_26small_3\sspYAP.mat');
+results_lbox = results;
 
-figure('Position', [10 10 800 400]); 
+folder = 'C:\Users\p70081859\Documents\MATLAB\updated tosend toLidan\24112022_rateStayupdated\updated_plot_code_for_paper\20240723T204519_results_722YAP_largerbox_xy_234sites_26small_3\';
 
-plot(results(1).time{1,1}(:,1:15*10^6)', results(1).pYAPAll{1,1}(:,1:15*10^6)'/particleNumber,'LineWidth',2,'Color',	[0  0.4470 0.7410]);
-xlabel('Time (s)'); ylabel('pYAP ratio');
+figure('Position', [10 10 750 400]); 
+%line_style = {'-','--',':'};
+
+plot(results_sbox(1).time{1,4}(:,1:3.5*10^6)', results_sbox(1).pYAPAll{1,4}(:,1:3.5*10^6)'/250,'LineWidth',1.5,'Color',[0 0.4470 0.7410]);
 set(gca,'Fontname', 'Times New Roman','fontsize',14);
 hold on;
 
-plot(results(1).time{1,2}(:,1:15*10^6)', results(1).pYAPAll{1,2}(:,1:15*10^6)'/particleNumber,'LineWidth',2,'Color',	[0.8500  0.3250  0.0980]);
-%xlabel('Time (s)'); ylabel('pYAP ratio');
+plot(results_lbox(1).time{1,1}(:,1:10*10^6)', results_lbox(1).pYAPAll{1,1}(:,1:10*10^6)'/722,'LineWidth',1.5,'Color',[0.8500 0.3250 0.0980]);
 set(gca,'Fontname', 'Times New Roman','fontsize',14);
+hold on;
 
-axis([0 300  0 0.4])
-legend('{\it{N}} = 1','','','{\it{N}} = 9','','','location','northeastoutside','Box','off');
+
+xlabel('Time (s)'); ylabel('pYAP ratio');
+hold on;
 
 % Get the current axes handle
 ax = gca;
 
 % Remove the top and right axes by setting the 'box' property to 'off'
 ax.Box = 'off';
+legend('Box 40\times40\times20','','','Box 68\times68\times20','','','location','northeastoutside','Box','off');
 
-folder = 'figures\';
+
+folder = 'figures\'
 print([folder 'figS4'],'-dpng','-r300');
+
+
 %% fig S5
 
 clc;
@@ -713,9 +723,384 @@ ax.Box = 'off';
 folder = 'figures\';
 print([folder 'figS5'],'-dpng','-r300');
 
+%% fig S6
+
+clc;
+clear;
+close all;
+
+load('20240716T142455_results_compare_cheng\sspYAP.mat');
 
 
-%% fig S6,S8
+avg_pyapAll = cellfun(@mean, results.avgpYAPAll)/particleNumber;
+std_pyapAll = cellfun(@std, results.avgpYAPAll)/particleNumber;
+
+close all
+figure('Position', [10 10 600 400]); 
+
+area = [1 3 5 7 9]*0.36; %0.36 the size of one adheision
+
+scatter(area, avg_pyapAll, 'SizeData', 30, 'MarkerFaceColor','k', 'Color', 'k') 
+hold on;
+errorbar(area, avg_pyapAll, std_pyapAll, 'LineStyle', 'none', 'Color', 'k', 'LineWidth',1.5);
+
+
+axis([0.1 3.5 0 0.6])
+
+xlabel('Total area covered by adhesions ($\mu$m$^{2}$)','Interpreter', 'latex'); ylabel('pYAP ratio');
+
+set(gca,'Fontname', 'Times New Roman','fontsize',14);
+
+set(gca,'Fontname', 'Times New Roman','fontsize',18);
+set(gca,'LineWidth',1);
+
+hold on;
+
+
+% Initialize variables to store fit results
+best_degree = 0; % Degree with the best fit
+best_rmse = Inf; % Initialize RMSE with a high value
+
+for degree = 1:1
+    % Fit a polynomial of the current degree
+    coeffs = polyfit(area, avg_pyapAll, degree);
+    
+    % Evaluate the polynomial on the x-values
+    fitted_pyapAll = polyval(coeffs, area);
+    
+    % Calculate the Root Mean Square Error (RMSE) as a measure of accuracy
+    rmse = sqrt(mean((fitted_pyapAll - avg_pyapAll).^2));
+    
+    % Check if this degree provides a better fit
+    if rmse < best_rmse
+        best_rmse = rmse;
+        best_degree = degree;
+    end
+    
+    % Optionally, you can plot the fitted curve for visualization
+%     figure;
+%     plot(x, fitted_y);
+    
+end
+
+hold on ;
+plot(0.36:0.1:3.3,polyval(coeffs, 0.36:0.1:3.3),'LineWidth',1.5,'Color',[150 150 150]/250,'LineStyle','--');
+
+%legend('{\it{N}} = 1','','{\it{N}} = 2','','{\it{N}} = 4','','{\it{N}} = 9','','location','northwest','Box','off');
+% Get the current axes handle
+ax = gca;
+
+% Remove the top and right axes by setting the 'box' property to 'off'
+ax.Box = 'off';
+
+folder = 'figures\';
+print([folder 'figS6'],'-dpng','-r300');
+
+%% fig S7 (top left)
+
+clc
+clear
+close all
+
+%diffusion_rate = [0.8];
+adhesion_number_legend = [9 1];
+
+load('20240716T231006_results_150YAP\sspYAP'); 
+results_150 = results;
+load('20240716T235252_results_250YAP\sspYAP.mat'); 
+results_250 = results;
+load('20240717T002858_results_400YAP\sspYAP.mat'); 
+results_400 = results;
+load('20240717T015100_results_800YAP\sspYAP.mat'); 
+results_800 = results;
+
+%particleNumberVector = [150; 250; 400; 800];
+
+particleNumberVector = [1; 1; 1; 1];
+%particleNumberVector = [150; 250; 400; 800];
+figure('Position', [10 10 500 420]);
+name = string();
+name(1) = ['{\it{n}} = 150']; name(2) = ['{\it{n}} = 250'];
+name(3) = ['{\it{n}} = 400']; name(4) = ['{\it{n}} = 800'];
+
+data_1 = [results_150(1).avg_iterations_pYAPAll{1,1} results_150(1).avg_iterations_pYAPAll{1,2}; ...
+          results_250(1).avg_iterations_pYAPAll{1,1} results_250(1).avg_iterations_pYAPAll{1,2}; ...
+          results_400(1).avg_iterations_pYAPAll{1,1} results_400(1).avg_iterations_pYAPAll{1,2}; ...
+          results_800(1).avg_iterations_pYAPAll{1,1} results_800(1).avg_iterations_pYAPAll{1,2}]./particleNumberVector;
+
+data_1_error = [results_150(1).std_iterations_pYAPAll{1,1} results_150(1).std_iterations_pYAPAll{1,2}; ...
+                results_250(1).std_iterations_pYAPAll{1,1} results_250(1).std_iterations_pYAPAll{1,2}; ...
+                results_400(1).std_iterations_pYAPAll{1,1} results_400(1).std_iterations_pYAPAll{1,2}; ...
+                results_800(1).std_iterations_pYAPAll{1,1} results_800(1).std_iterations_pYAPAll{1,2}]./particleNumberVector;
+
+bar_color = gray(4);
+b = bar(data_1,'grouped'); hold on;
+b(1).FaceColor = bar_color(2,:);
+b(2).FaceColor = bar_color(3,:);
+
+[ngroups,nbars] = size(data_1);
+
+% Get the x coordinate of the bars
+x = nan(nbars, ngroups);
+for i = 1:nbars
+    x(i,:) = b(i).XEndPoints;
+end
+
+% Plot the errorbars
+errorbar(x',data_1,data_1_error,'k','linestyle','none');
+hold off;
+
+ylabel('pYAP');
+xticklabels(name);
+%'{\it{N}} = ' + 
+legend(' {\it{N}} = ' + string(flip(adhesion_number_legend)),'location','northoutside','orientation', 'horizontal','Box','off');
+
+set(gca,'Fontname', 'Times New Roman','fontsize',18);
+set(gca,'LineWidth',1);
+
+% Get the current axes handle
+ax = gca;
+
+% Remove the top and right axes by setting the 'box' property to 'off'
+ax.Box = 'off';
+
+%ylim([0.1, 0.8]);
+ylim([20, 300]);
+title('{\it{D}} = 0.8 {\mu}m^{2}/s', 'fontsize',14, 'FontWeight', 'normal')
+
+folder = 'figures\';
+print([folder 'figS7_1'],'-dpng','-r300');
+
+%% fig S7 (bottom left)
+
+clc
+clear
+close all
+
+%diffusion_rate = [0.8];
+adhesion_number_legend = [9 1];
+
+load('20240716T231006_results_150YAP\sspYAP'); 
+results_150 = results;
+load('20240716T235252_results_250YAP\sspYAP.mat'); 
+results_250 = results;
+load('20240717T002858_results_400YAP\sspYAP.mat'); 
+results_400 = results;
+load('20240717T015100_results_800YAP\sspYAP.mat'); 
+results_800 = results;
+
+%particleNumberVector = [150; 250; 400; 800];
+
+particleNumberVector = [1; 1; 1; 1];
+particleNumberVector = [150; 250; 400; 800];
+figure('Position', [10 10 500 420]);
+name = string();
+name(1) = ['{\it{n}} = 150']; name(2) = ['{\it{n}} = 250'];
+name(3) = ['{\it{n}} = 400']; name(4) = ['{\it{n}} = 800'];
+
+data_1 = [results_150(1).avg_iterations_pYAPAll{1,1} results_150(1).avg_iterations_pYAPAll{1,2}; ...
+          results_250(1).avg_iterations_pYAPAll{1,1} results_250(1).avg_iterations_pYAPAll{1,2}; ...
+          results_400(1).avg_iterations_pYAPAll{1,1} results_400(1).avg_iterations_pYAPAll{1,2}; ...
+          results_800(1).avg_iterations_pYAPAll{1,1} results_800(1).avg_iterations_pYAPAll{1,2}]./particleNumberVector;
+
+data_1_error = [results_150(1).std_iterations_pYAPAll{1,1} results_150(1).std_iterations_pYAPAll{1,2}; ...
+                results_250(1).std_iterations_pYAPAll{1,1} results_250(1).std_iterations_pYAPAll{1,2}; ...
+                results_400(1).std_iterations_pYAPAll{1,1} results_400(1).std_iterations_pYAPAll{1,2}; ...
+                results_800(1).std_iterations_pYAPAll{1,1} results_800(1).std_iterations_pYAPAll{1,2}]./particleNumberVector;
+
+bar_color = gray(4);
+b = bar(data_1,'grouped'); hold on;
+b(1).FaceColor = bar_color(2,:);
+b(2).FaceColor = bar_color(3,:);
+
+[ngroups,nbars] = size(data_1);
+
+% Get the x coordinate of the bars
+x = nan(nbars, ngroups);
+for i = 1:nbars
+    x(i,:) = b(i).XEndPoints;
+end
+
+% Plot the errorbars
+errorbar(x',data_1,data_1_error,'k','linestyle','none');
+hold off;
+
+ylabel('pYAP ratio');
+xticklabels(name);
+%'{\it{N}} = ' + 
+legend(' {\it{N}} = ' + string(flip(adhesion_number_legend)),'location','northoutside','orientation', 'horizontal','Box','off');
+
+set(gca,'Fontname', 'Times New Roman','fontsize',18);
+set(gca,'LineWidth',1);
+
+% Get the current axes handle
+ax = gca;
+
+% Remove the top and right axes by setting the 'box' property to 'off'
+ax.Box = 'off';
+
+%ylim([0.1, 0.8]);
+ylim([0.2, 0.6]);
+title('{\it{D}} = 0.8 {\mu}m^{2}/s', 'fontsize',14, 'FontWeight', 'normal')
+
+folder = 'figures\';
+print([folder 'figS7_2'],'-dpng','-r300');
+
+
+
+%% fig S7 (top right)
+
+clc
+clear
+close all
+
+%diffusion_rate = [0.8];
+adhesion_number_legend = [9 1];
+
+load('20240718T130844_results_150YAP_D05\sspYAP'); 
+results_150 = results;
+load('20240719T115431_results_250YAP_D05\sspYAP.mat'); 
+results_250 = results;
+load('20240719T101344_results_400YAP_D05\sspYAP.mat'); 
+results_400 = results;
+load('20240718T135142_results_800YAP_D05\sspYAP.mat'); 
+results_800 = results;
+
+%particleNumberVector = [150; 250; 400; 800];
+
+particleNumberVector = [1; 1; 1; 1];
+%particleNumberVector = [150; 250; 400; 800];
+figure('Position', [10 10 500 420]);
+name = string();
+name(1) = ['{\it{n}} = 150']; name(2) = ['{\it{n}} = 250'];
+name(3) = ['{\it{n}} = 400']; name(4) = ['{\it{n}} = 800'];
+
+data_1 = [results_150(1).avg_iterations_pYAPAll{1,1} results_150(1).avg_iterations_pYAPAll{1,2}; ...
+          results_250(1).avg_iterations_pYAPAll{1,1} results_250(1).avg_iterations_pYAPAll{1,2}; ...
+          results_400(1).avg_iterations_pYAPAll{1,1} results_400(1).avg_iterations_pYAPAll{1,2}; ...
+          results_800(1).avg_iterations_pYAPAll{1,1} results_800(1).avg_iterations_pYAPAll{1,2}]./particleNumberVector;
+
+data_1_error = [results_150(1).std_iterations_pYAPAll{1,1} results_150(1).std_iterations_pYAPAll{1,2}; ...
+                results_250(1).std_iterations_pYAPAll{1,1} results_250(1).std_iterations_pYAPAll{1,2}; ...
+                results_400(1).std_iterations_pYAPAll{1,1} results_400(1).std_iterations_pYAPAll{1,2}; ...
+                results_800(1).std_iterations_pYAPAll{1,1} results_800(1).std_iterations_pYAPAll{1,2}]./particleNumberVector;
+
+bar_color = gray(4);
+b = bar(data_1,'grouped'); hold on;
+b(1).FaceColor = bar_color(2,:);
+b(2).FaceColor = bar_color(3,:);
+
+[ngroups,nbars] = size(data_1);
+
+% Get the x coordinate of the bars
+x = nan(nbars, ngroups);
+for i = 1:nbars
+    x(i,:) = b(i).XEndPoints;
+end
+
+% Plot the errorbars
+errorbar(x',data_1,data_1_error,'k','linestyle','none');
+hold off;
+
+ylabel('pYAP');
+xticklabels(name);
+%'{\it{N}} = ' + 
+legend(' {\it{N}} = ' + string(flip(adhesion_number_legend)),'location','northoutside','orientation', 'horizontal','Box','off');
+
+set(gca,'Fontname', 'Times New Roman','fontsize',18);
+set(gca,'LineWidth',1);
+
+% Get the current axes handle
+ax = gca;
+
+% Remove the top and right axes by setting the 'box' property to 'off'
+ax.Box = 'off';
+
+%ylim([0.1, 0.8]);
+ylim([20, 300]);
+title('{\it{D}} = 0.5 {\mu}m^{2}/s', 'fontsize',14, 'FontWeight', 'normal')
+
+folder = 'figures\';
+print([folder 'figS7_3'],'-dpng','-r300');
+
+%% fig S7 (bottom right)
+
+clc
+clear
+close all
+
+%diffusion_rate = [0.8];
+adhesion_number_legend = [9 1];
+
+load('20240718T130844_results_150YAP_D05\sspYAP'); 
+results_150 = results;
+load('20240719T115431_results_250YAP_D05\sspYAP.mat'); 
+results_250 = results;
+load('20240719T101344_results_400YAP_D05\sspYAP.mat'); 
+results_400 = results;
+load('20240718T135142_results_800YAP_D05\sspYAP.mat'); 
+results_800 = results;
+
+%particleNumberVector = [150; 250; 400; 800];
+
+particleNumberVector = [1; 1; 1; 1];
+particleNumberVector = [150; 250; 400; 800];
+figure('Position', [10 10 500 420]);
+name = string();
+name(1) = ['{\it{n}} = 150']; name(2) = ['{\it{n}} = 250'];
+name(3) = ['{\it{n}} = 400']; name(4) = ['{\it{n}} = 800'];
+
+data_1 = [results_150(1).avg_iterations_pYAPAll{1,1} results_150(1).avg_iterations_pYAPAll{1,2}; ...
+          results_250(1).avg_iterations_pYAPAll{1,1} results_250(1).avg_iterations_pYAPAll{1,2}; ...
+          results_400(1).avg_iterations_pYAPAll{1,1} results_400(1).avg_iterations_pYAPAll{1,2}; ...
+          results_800(1).avg_iterations_pYAPAll{1,1} results_800(1).avg_iterations_pYAPAll{1,2}]./particleNumberVector;
+
+data_1_error = [results_150(1).std_iterations_pYAPAll{1,1} results_150(1).std_iterations_pYAPAll{1,2}; ...
+                results_250(1).std_iterations_pYAPAll{1,1} results_250(1).std_iterations_pYAPAll{1,2}; ...
+                results_400(1).std_iterations_pYAPAll{1,1} results_400(1).std_iterations_pYAPAll{1,2}; ...
+                results_800(1).std_iterations_pYAPAll{1,1} results_800(1).std_iterations_pYAPAll{1,2}]./particleNumberVector;
+
+bar_color = gray(4);
+b = bar(data_1,'grouped'); hold on;
+b(1).FaceColor = bar_color(2,:);
+b(2).FaceColor = bar_color(3,:);
+
+[ngroups,nbars] = size(data_1);
+
+% Get the x coordinate of the bars
+x = nan(nbars, ngroups);
+for i = 1:nbars
+    x(i,:) = b(i).XEndPoints;
+end
+
+% Plot the errorbars
+errorbar(x',data_1,data_1_error,'k','linestyle','none');
+hold off;
+
+ylabel('pYAP ratio');
+xticklabels(name);
+%'{\it{N}} = ' + 
+legend(' {\it{N}} = ' + string(flip(adhesion_number_legend)),'location','northoutside','orientation', 'horizontal','Box','off');
+
+set(gca,'Fontname', 'Times New Roman','fontsize',18);
+set(gca,'LineWidth',1);
+
+% Get the current axes handle
+ax = gca;
+
+% Remove the top and right axes by setting the 'box' property to 'off'
+ax.Box = 'off';
+
+%ylim([0.1, 0.8]);
+ylim([0.2, 0.6]);
+title('{\it{D}} = 0.5 {\mu}m^{2}/s', 'fontsize',14, 'FontWeight', 'normal')
+
+folder = 'figures\';
+print([folder 'figS7_4'],'-dpng','-r300');
+
+%% fig S9 is the zoomed-in version of fig. 4
+
+%% fig S8,S10
 
 clc;
 clear;
@@ -850,7 +1235,7 @@ ax = gca;
 ax.Box = 'off';
 
 folder = 'figures\'
-print([folder 'figS6' ],'-dpng','-r300');
+print([folder 'figS8' ],'-dpng','-r300');
 
 %#################################### Ru = 0.001
 figure('Position', [10 10 1200 700]); 
@@ -963,7 +1348,7 @@ ax = gca;
 % Remove the top and right axes by setting the 'box' property to 'off'
 ax.Box = 'off';
 
-print([folder 'figS8' ],'-dpng','-r300');
+print([folder 'figS10' ],'-dpng','-r300');
 
 
 
